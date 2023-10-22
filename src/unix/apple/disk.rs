@@ -1,9 +1,6 @@
 // Take a look at the license at the top of the repository in the LICENSE file.
 
-use crate::sys::{
-    ffi,
-    utils::{self, CFReleaser},
-};
+use crate::sys::{ffi, utils::CFReleaser};
 use crate::{Disk, DiskKind};
 
 use core_foundation_sys::array::CFArrayCreate;
@@ -14,6 +11,8 @@ use core_foundation_sys::string::{self as cfs, CFStringRef};
 
 use libc::c_void;
 
+use crate::unix::sys::utils::cstr_to_rust_with_size;
+use crate::unix::utils::CStrPtr;
 use std::ffi::{CStr, OsStr, OsString};
 use std::os::unix::ffi::{OsStrExt, OsStringExt};
 use std::path::{Path, PathBuf};
@@ -310,12 +309,12 @@ pub(super) unsafe fn get_str_value(dict: CFDictionaryRef, key: DictKey) -> Optio
             );
 
             if success != 0 {
-                utils::vec_to_rust(buf)
+                buf[..].cstr_to_string()
             } else {
                 None
             }
         } else {
-            crate::unix::utils::cstr_to_rust_with_size(v_ptr, Some(len_bytes))
+            cstr_to_rust_with_size(v_ptr, len_bytes)
         }
     })
 }

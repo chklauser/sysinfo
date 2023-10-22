@@ -72,7 +72,7 @@ pub(crate) unsafe fn get_group_name(
         break;
     }
     let g = g.assume_init();
-    super::utils::cstr_to_rust(g.gr_name)
+    g.gr_name.cstr_to_string()
 }
 
 pub(crate) unsafe fn get_user_groups(
@@ -142,3 +142,4 @@ pub(crate) fn get_users(users: &mut Vec<User>) {
 
 #[cfg(any(target_os = "macos", target_os = "ios"))]
 pub(crate) use crate::unix::apple::users::get_users;
+use crate::unix::utils::CStrPtr;

@@ -1,5 +1,6 @@
 // Take a look at the license at the top of the repository in the LICENSE file.
 
+use crate::unix::utils::CStrPtr;
 use crate::{Pid, Process};
 use libc::{c_char, c_int, timeval};
 use std::cell::UnsafeCell;
@@ -122,7 +123,7 @@ pub(crate) fn c_buf_to_str(buf: &[libc::c_char]) -> Option<&str> {
 }
 
 pub(crate) fn c_buf_to_string(buf: &[libc::c_char]) -> Option<String> {
-    c_buf_to_str(buf).map(|s| s.to_owned())
+    unsafe { buf.cstr_to_string() }
 }
 
 pub(crate) unsafe fn get_sys_value_str(mib: &[c_int], buf: &mut [libc::c_char]) -> Option<String> {

@@ -5,6 +5,7 @@ use crate::{
     User, UserInner,
 };
 
+use crate::unix::utils::CStrPtr;
 use libc::{c_char, endpwent, getpwent, setpwent, strlen};
 use std::collections::HashMap;
 
@@ -48,7 +49,7 @@ pub(crate) fn get_users(users: &mut Vec<User>) {
                 // This is not a "real" or "local" user.
                 continue;
             }
-            if let Some(name) = crate::unix::utils::cstr_to_rust((*pw).pw_name) {
+            if let Some(name) = (*pw).pw_name.cstr_to_string() {
                 if users_map.contains_key(&name) {
                     continue;
                 }

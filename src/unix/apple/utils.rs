@@ -1,8 +1,10 @@
 // Take a look at the license at the top of the repository in the LICENSE file.
 
+use crate::unix::utils::CStrPtr;
 use core_foundation_sys::base::CFRelease;
 use libc::{c_char, c_void, sysctl, sysctlbyname};
 use std::ptr::NonNull;
+use std::slice::from_raw_parts;
 
 // A helper using to auto release the resource got from CoreFoundation.
 // More information about the ownership policy for CoreFoundation pelease refer the link below:
@@ -35,15 +37,6 @@ impl<T> Drop for CFReleaser<T> {
 unsafe impl<T> Send for CFReleaser<T> {}
 unsafe impl<T> Sync for CFReleaser<T> {}
 
-pub(crate) fn vec_to_rust(buf: Vec<i8>) -> Option<String> {
-    String::from_utf8(
-        buf.into_iter()
-            .flat_map(|b| if b > 0 { Some(b as u8) } else { None })
-            .collect(),
-    )
-    .ok()
-}
-
 pub(crate) unsafe fn get_sys_value(
     high: u32,
     low: u32,
@@ -75,4 +68,15 @@ pub(crate) unsafe fn get_sys_value_by_name(
         std::ptr::null_mut(),
         0,
     ) == 0
+}
+
+/// # Safety
+///  1. `c` must either be a null pointer or a zero-terminated C string.
+///  2. If `c` is not a null pointer, it must point to the beginning of a memory region of at least
+///     `size` bytes.
+pub(crate) unsafe fn cstr_to_rust_with_size(c: *const c_char, size: usize) -> Option<String> {
+    if c.is_null() {
+        return None;
+    }
+    from_raw_parts(c, size).cstr_to_string()
 }

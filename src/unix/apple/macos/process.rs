@@ -12,7 +12,7 @@ use crate::{DiskUsage, Gid, Pid, Process, ProcessRefreshKind, ProcessStatus, Sig
 
 use crate::sys::process::ThreadStatus;
 use crate::sys::system::Wrap;
-use crate::unix::utils::cstr_to_rust_with_size;
+use crate::unix::apple::utils::cstr_to_rust_with_size;
 
 pub(crate) struct ProcessInner {
     pub(crate) name: String,
@@ -355,7 +355,7 @@ unsafe fn convert_node_path_info(node: &libc::vnode_info_path) -> PathBuf {
     }
     cstr_to_rust_with_size(
         node.vip_path.as_ptr() as _,
-        Some(node.vip_path.len() * node.vip_path[0].len()),
+        node.vip_path.len() * node.vip_path[0].len(),
     )
     .map(PathBuf::from)
     .unwrap_or_default()
